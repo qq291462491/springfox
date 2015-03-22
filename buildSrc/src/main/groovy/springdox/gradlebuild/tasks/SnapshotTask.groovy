@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
+
 package springdox.gradlebuild.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
-class CheckCleanWorkspaceTask extends DefaultTask {
-  public static final String TASK_NAME = "checkCleanWorkspace"
-  String description = "Checks workspace is in sync with remote"
-  String group = "release"
+class SnapshotTask extends DefaultTask {
+  public static final String TASK_NAME = 'snapshot'
+  String description = 'snapshot release flow'
+  String group = 'release'
 
   @TaskAction
-  void check() {
-    def sout = new ByteArrayOutputStream()
-    project.exec {
-      commandLine "git", "status", "--porcelain"
-      standardOutput = sout
-    }
-    def gitStatus = sout.toString()
-    assert gitStatus == "": "Workspace is not clean ${gitStatus}"
+  void release() {
   }
+
 }

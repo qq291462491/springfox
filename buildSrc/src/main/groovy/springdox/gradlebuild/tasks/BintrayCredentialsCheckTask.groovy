@@ -19,19 +19,23 @@ package springdox.gradlebuild.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
-class CheckCleanWorkspaceTask extends DefaultTask {
-  public static final String TASK_NAME = "checkCleanWorkspace"
-  String description = "Checks workspace is in sync with remote"
-  String group = "release"
+class BintrayCredentialsCheckTask extends DefaultTask {
+  public static final TASK_NAME = "bintrayCredentialsCheck"
+  String description = 'verifies bintray credentials'
+  String group = 'release'
 
   @TaskAction
-  void check() {
-    def sout = new ByteArrayOutputStream()
-    project.exec {
-      commandLine "git", "status", "--porcelain"
-      standardOutput = sout
+  def action() {
+    requiredProperty('bintrayUsername')
+    requiredProperty('bintrayPassword')
+  }
+
+  String requiredProperty(String propName) {
+    if (project.hasProperty(propName)) {
+      assert project.property(propName): "Property ${propName} must not be blank!"
+      return project.property(propName)
+    } else {
+      throw new IllegalArgumentException("Property ${propName} is required!")
     }
-    def gitStatus = sout.toString()
-    assert gitStatus == "": "Workspace is not clean ${gitStatus}"
   }
 }
