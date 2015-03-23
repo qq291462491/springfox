@@ -75,7 +75,6 @@ public class MultiProjectReleasePlugin implements Plugin<Project> {
         }
         def jcenterTasks = it.tasks.findAll { it.name.contains('ToJcenterRepository') }
         if (jcenterTasks) {
-//          iPublishTask.dependsOn(jcenterTasks)\
           snapshotTask.dependsOn jcenterTasks
         }
       }
