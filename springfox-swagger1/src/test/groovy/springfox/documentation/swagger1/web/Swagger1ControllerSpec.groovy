@@ -18,8 +18,9 @@
  */
 
 package springfox.documentation.swagger1.web
-
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.collect.LinkedListMultimap
+import com.google.common.collect.Multimap
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc
@@ -28,9 +29,11 @@ import org.springframework.web.servlet.View
 import spock.lang.Shared
 import spock.lang.Unroll
 import springfox.documentation.builders.DocumentationBuilder
+import springfox.documentation.service.ApiListing
 import springfox.documentation.service.Documentation
 import springfox.documentation.service.SecurityScheme
 import springfox.documentation.spring.web.DocumentationCache
+import springfox.documentation.spring.web.json.JsonSerializer
 import springfox.documentation.spring.web.mixins.ApiListingSupport
 import springfox.documentation.spring.web.mixins.AuthSupport
 import springfox.documentation.spring.web.mixins.JsonSupport
@@ -60,15 +63,15 @@ class Swagger1ControllerSpec extends DocumentationContextSpec {
 
   def setup() {
     controller.documentationCache = new DocumentationCache()
+
+    controller.jsonSerializer = new JsonSerializer([new SwaggerJacksonModule()])
     listingReferenceScanner = Mock(ApiListingReferenceScanner)
     listingReferenceScanner.scan(_) >> new ApiListingReferenceScanResult([], newHashMap())
     controller.mapper = serviceMapper()
     def jackson2 = new MappingJackson2HttpMessageConverter()
-
     jackson2.setSupportedMediaTypes([MediaType.ALL, MediaType.APPLICATION_JSON])
 
     def mapper = new ObjectMapper()
-    SwaggerJacksonModule.maybeRegisterModule(mapper)
 
     jackson2.setObjectMapper(mapper)
     mockMvc = standaloneSetup(controller)
@@ -101,9 +104,12 @@ class Swagger1ControllerSpec extends DocumentationContextSpec {
 
   def "should respond with api listing for a given resource group"() {
     given:
+      Multimap<String, ApiListing> listings = LinkedListMultimap.<String, ApiListing>create()
+      listings.put('businesses', apiListing())
+    and:
       Documentation group = new DocumentationBuilder()
               .name("groupName")
-              .apiListingsByResourceGroupName(['businesses': apiListing()])
+              .apiListingsByResourceGroupName(listings)
               .build()
       controller.documentationCache.addDocumentation(group)
     when:
@@ -127,7 +133,6 @@ class Swagger1ControllerSpec extends DocumentationContextSpec {
     when:
       MvcResult result = mockMvc.perform(get("/api-docs?group=groupName")).andDo(print()).andReturn()
       def json = jsonBodyResponse(result)
-//      println json
 
     then:
       result.getResponse().getStatus() == 200

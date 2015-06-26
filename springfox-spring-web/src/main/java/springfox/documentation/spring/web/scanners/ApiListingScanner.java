@@ -21,6 +21,8 @@ package springfox.documentation.spring.web.scanners;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import springfox.documentation.PathProvider;
@@ -30,12 +32,12 @@ import springfox.documentation.service.ApiDescription;
 import springfox.documentation.service.ApiListing;
 import springfox.documentation.service.ResourceGroup;
 import springfox.documentation.service.SecurityReference;
+import springfox.documentation.spi.service.ResourceGroupingStrategy;
 import springfox.documentation.spi.service.contexts.ApiListingContext;
 import springfox.documentation.spi.service.contexts.DocumentationContext;
 import springfox.documentation.spi.service.contexts.RequestMappingContext;
 import springfox.documentation.spring.web.plugins.DocumentationPluginsManager;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -44,7 +46,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.*;
-import static com.google.common.collect.Maps.*;
 import static com.google.common.collect.Sets.*;
 
 @Component
@@ -62,9 +63,8 @@ public class ApiListingScanner {
     this.pluginsManager = pluginsManager;
   }
 
-  @SuppressWarnings("unchecked")
-  public Map<String, ApiListing> scan(ApiListingScanningContext context) {
-    Map<String, ApiListing> apiListingMap = newHashMap();
+  public Multimap<String, ApiListing> scan(ApiListingScanningContext context) {
+    Multimap<String, ApiListing> apiListingMap = LinkedListMultimap.create();
     int position = 0;
 
     Map<ResourceGroup, List<RequestMappingContext>> requestMappingsByResourceGroup
@@ -80,14 +80,20 @@ public class ApiListingScanner {
       Set<String> protocols = new LinkedHashSet<String>(documentationContext.getProtocols());
       Set<ApiDescription> apiDescriptions = newHashSet();
 
+      ResourceGroupingStrategy resourceGroupingStrategy = documentationContext.getResourceGroupingStrategy();
+      String listingDescription = null;
+
       Map<String, Model> models = new LinkedHashMap<String, Model>();
       for (RequestMappingContext each : entry.getValue()) {
         models.putAll(apiModelReader.read(each.withKnownModels(models)));
         apiDescriptions.addAll(apiDescriptionReader.read(each));
+        // Resource description will be the same for all handler methods
+        listingDescription =
+                resourceGroupingStrategy.getResourceDescription(each.getRequestMappingInfo(), each.getHandlerMethod());
       }
 
 
-      ArrayList sortedApis = new ArrayList(apiDescriptions);
+      List<ApiDescription> sortedApis = newArrayList(apiDescriptions);
       Collections.sort(sortedApis, documentationContext.getApiDescriptionOrdering());
 
       String resourcePath = longestCommonPath(sortedApis);
@@ -105,7 +111,7 @@ public class ApiListingScanner {
               .securityReferences(securityReferences)
               .apis(sortedApis)
               .models(models)
-              .description(null)
+              .description(listingDescription)
               .position(position++);
 
       ApiListingContext apiListingContext = new ApiListingContext(context.getDocumentationType(), resourceGroup,
@@ -117,7 +123,7 @@ public class ApiListingScanner {
   }
 
 
-  static String longestCommonPath(ArrayList<ApiDescription> apiDescriptions) {
+  static String longestCommonPath(List<ApiDescription> apiDescriptions) {
     List<String> commons = newArrayList();
     if (null == apiDescriptions || apiDescriptions.isEmpty()) {
       return null;

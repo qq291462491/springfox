@@ -21,14 +21,15 @@ package springfox.documentation.swagger2.mappers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.wordnik.swagger.models.parameters.CookieParameter;
-import com.wordnik.swagger.models.parameters.FormParameter;
-import com.wordnik.swagger.models.parameters.HeaderParameter;
-import com.wordnik.swagger.models.parameters.PathParameter;
-import com.wordnik.swagger.models.parameters.QueryParameter;
-import com.wordnik.swagger.models.parameters.SerializableParameter;
-import com.wordnik.swagger.models.properties.Property;
+import io.swagger.models.parameters.CookieParameter;
+import io.swagger.models.parameters.FormParameter;
+import io.swagger.models.parameters.HeaderParameter;
+import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.QueryParameter;
+import io.swagger.models.parameters.SerializableParameter;
+import io.swagger.models.properties.Property;
 import springfox.documentation.schema.ModelRef;
+import springfox.documentation.service.AllowableListValues;
 import springfox.documentation.service.Parameter;
 
 import java.util.Map;
@@ -48,7 +49,7 @@ public class SerializableParameterFactories {
     throw new UnsupportedOperationException();
   }
 
-  static Optional<com.wordnik.swagger.models.parameters.Parameter> create(Parameter source) {
+  static Optional<io.swagger.models.parameters.Parameter> create(Parameter source) {
     SerializableParameterFactory factory = forMap(SerializableParameterFactories.factory, new NullSerializableParameterFactory())
         .apply(source.getParamType().toLowerCase());
 
@@ -70,7 +71,15 @@ public class SerializableParameterFactories {
       toReturn.setType(property.getType());
       toReturn.setFormat(property.getFormat());
     }
-    return Optional.of((com.wordnik.swagger.models.parameters.Parameter)toReturn);
+    maybeAddAlllowableValues(source, toReturn);
+    return Optional.of((io.swagger.models.parameters.Parameter)toReturn);
+  }
+
+  private static void maybeAddAlllowableValues(Parameter source, SerializableParameter toReturn) {
+    if (source.getAllowableValues() instanceof AllowableListValues) {
+      AllowableListValues allowableValues = (AllowableListValues) source.getAllowableValues();
+      toReturn.setEnum(allowableValues.getValues());
+    }
   }
 
   static class CookieSerializableParameterFactory implements SerializableParameterFactory {

@@ -17,7 +17,8 @@
     "basePath": "/",
     "tags": [
         {
-            "name": "fancy-pet-service"
+            "name": "fancy-pet-service",
+            "description": "Operations about fancy pets"
         }
     ],
     "produces": [
@@ -32,7 +33,6 @@
                 ],
                 "operationId": "createObjectUsingPOST",
                 "summary": "createObject",
-                "description": "createObject",
                 "consumes": [
                     "application/json"
                 ],
@@ -44,7 +44,7 @@
                         "in": "body",
                         "name": "object",
                         "description": "object",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/FancyPet"
                         }

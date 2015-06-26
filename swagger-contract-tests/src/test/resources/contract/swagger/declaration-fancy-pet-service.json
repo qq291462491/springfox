@@ -15,7 +15,6 @@
                 {
                     "method": "PUT",
                     "summary": "updatePet",
-                    "notes": "updatePet",
                     "nickname": "updatePetUsingPUT",
                     "produces": [
                         "*/*"
@@ -31,7 +30,7 @@
                             "name": "body",
                             "paramType": "body",
                             "type": "Pet",
-                            "required": false
+                            "required": true
                         }
                     ],
                     "responseMessages": [
@@ -68,7 +67,6 @@
                 {
                     "method": "POST",
                     "summary": "createObject",
-                    "notes": "createObject",
                     "nickname": "createObjectUsingPOST",
                     "produces": [
                         "*/*"
@@ -84,7 +82,7 @@
                             "name": "body",
                             "paramType": "body",
                             "type": "FancyPet",
-                            "required": false
+                            "required": true
                         }
                     ],
                     "responseMessages": [
@@ -123,7 +121,6 @@
                 {
                     "method": "POST",
                     "summary": "createObject",
-                    "notes": "createObject",
                     "nickname": "createObjectUsingPOST",
                     "produces": [
                         "*/*"
@@ -139,7 +136,7 @@
                             "name": "body",
                             "paramType": "body",
                             "type": "FancyPet",
-                            "required": false
+                            "required": true
                         },
                         {
                             "allowMultiple": false,

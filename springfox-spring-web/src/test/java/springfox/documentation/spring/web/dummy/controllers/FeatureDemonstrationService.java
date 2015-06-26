@@ -19,9 +19,9 @@
 
 package springfox.documentation.spring.web.dummy.controllers;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.joda.time.LocalDate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -33,12 +33,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 import springfox.documentation.spring.web.dummy.models.EnumType;
 import springfox.documentation.spring.web.dummy.models.Example;
+import springfox.documentation.spring.web.dummy.models.ModelWithMapProperty;
 import springfox.documentation.spring.web.dummy.models.NestedType;
 import springfox.documentation.spring.web.dummy.models.Pet;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.*;
 
@@ -113,6 +115,16 @@ public class FeatureDemonstrationService {
   @RequestMapping
   @ApiOperation(value = "all")
   public HttpEntity<String> all() {
+    throw new UnsupportedOperationException();
+  }
+
+  @RequestMapping(value = "mapProperty", method = RequestMethod.GET)
+  public ModelWithMapProperty modelWithMapProperty() {
+    throw new UnsupportedOperationException();
+  }
+
+  @RequestMapping(value = "listOfMaps", method = RequestMethod.GET)
+  public List<Map<String, String>> listOfMaps() {
     throw new UnsupportedOperationException();
   }
 }

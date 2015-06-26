@@ -34,6 +34,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import springfox.documentation.builders.ModelPropertyBuilder;
@@ -44,13 +46,15 @@ import springfox.documentation.schema.configuration.ObjectMapperConfigured;
 import springfox.documentation.schema.plugins.SchemaPluginsManager;
 import springfox.documentation.schema.property.BeanPropertyDefinitions;
 import springfox.documentation.schema.property.BeanPropertyNamingStrategy;
-import springfox.documentation.schema.property.provider.ModelPropertiesProvider;
+import springfox.documentation.schema.property.ModelPropertiesProvider;
 import springfox.documentation.spi.schema.contexts.ModelContext;
 import springfox.documentation.spi.schema.contexts.ModelPropertyContext;
 
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Predicates.*;
+import static com.google.common.collect.FluentIterable.*;
 import static com.google.common.collect.Lists.*;
 import static com.google.common.collect.Maps.*;
 import static springfox.documentation.schema.ResolvedTypes.*;
@@ -59,6 +63,7 @@ import static springfox.documentation.spi.schema.contexts.ModelContext.*;
 
 @Component
 public class BeanModelPropertyProvider implements ModelPropertiesProvider {
+  private static final Logger LOG = LoggerFactory.getLogger(BeanModelPropertyProvider.class);
 
   private final AccessorsProvider accessors;
   private final BeanPropertyNamingStrategy namingStrategy;
@@ -87,21 +92,50 @@ public class BeanModelPropertyProvider implements ModelPropertiesProvider {
     this.objectMapper = event.getObjectMapper();
   }
 
+  @Override
+  public List<ModelProperty> propertiesFor(ResolvedType type, ModelContext givenContext) {
+
+    List<ModelProperty> serializationCandidates = newArrayList();
+    BeanDescription beanDescription = beanDescription(type, givenContext);
+    Map<String, BeanPropertyDefinition> propertyLookup = uniqueIndex(beanDescription.findProperties(),
+        BeanPropertyDefinitions.beanPropertyByInternalName());
+    for (Map.Entry<String, BeanPropertyDefinition> each : propertyLookup.entrySet()) {
+      LOG.debug("Reading property {}", each.getKey());
+      BeanPropertyDefinition propertyDefinition = each.getValue();
+      Optional<BeanPropertyDefinition> jacksonProperty
+          = jacksonPropertyWithSameInternalName(beanDescription, propertyDefinition);
+      AnnotatedMember member = propertyDefinition.getPrimaryMember();
+
+      Optional<ResolvedMethod> accessor = findAccessorMethod(type, each.getKey(), member);
+      if (accessor.isPresent()) {
+        LOG.debug("Accessor selected {}", accessor.get().getName());
+        serializationCandidates
+            .addAll(candidateProperties(member, accessor.get(), jacksonProperty, givenContext));
+      }
+    }
+    return serializationCandidates;
+  }
+
   @VisibleForTesting
-  List<ModelProperty> addCandidateProperties(AnnotatedMember member,
-      ResolvedMethod childProperty,
-      Optional<BeanPropertyDefinition> jacksonProperty,
-      ModelContext givenContext) {
+  List<ModelProperty> candidateProperties(AnnotatedMember member,
+        ResolvedMethod childProperty,
+        Optional<BeanPropertyDefinition> jacksonProperty,
+        ModelContext givenContext) {
 
     if (member instanceof AnnotatedMethod && Annotations.memberIsUnwrapped(member)) {
       if (Accessors.isGetter(((AnnotatedMethod) member).getMember())) {
+        LOG.debug("Evaluating unwrapped getter for member {}", ((AnnotatedMethod) member).getMember().getName());
         return propertiesFor(childProperty.getReturnType(), fromParent(givenContext, childProperty.getReturnType()));
       } else {
+        LOG.debug("Evaluating unwrapped setter for member {}", ((AnnotatedMethod) member).getMember().getName());
         return propertiesFor(childProperty.getArgumentType(0),
             fromParent(givenContext, childProperty.getArgumentType(0)));
       }
     } else {
-      return newArrayList(beanModelProperty(childProperty, jacksonProperty, givenContext));
+      LOG.debug("Evaluating property of {}", childProperty);
+      return from(newArrayList(beanModelProperty(childProperty, jacksonProperty, givenContext)))
+          .filter(not(ignorable(givenContext)))
+          .toList();
     }
   }
 
@@ -115,28 +149,6 @@ public class BeanModelPropertyProvider implements ModelPropertiesProvider {
       return serializationConfig.introspect(TypeFactory.defaultInstance()
           .constructType(type.getErasedType()));
     }
-  }
-
-  @Override
-  public List<ModelProperty> propertiesFor(ResolvedType type, ModelContext givenContext) {
-
-    List<ModelProperty> serializationCandidates = newArrayList();
-    BeanDescription beanDescription = beanDescription(type, givenContext);
-    Map<String, BeanPropertyDefinition> propertyLookup = uniqueIndex(beanDescription.findProperties(),
-        BeanPropertyDefinitions.beanPropertyByInternalName());
-    for (Map.Entry<String, BeanPropertyDefinition> each : propertyLookup.entrySet()) {
-
-      BeanPropertyDefinition propertyDefinition = each.getValue();
-      Optional<BeanPropertyDefinition> jacksonProperty
-          = jacksonPropertyWithSameInternalName(beanDescription, propertyDefinition);
-      AnnotatedMember member = propertyDefinition.getPrimaryMember();
-      Optional<ResolvedMethod> accessor = findAccessorMethod(type, each.getKey(), member);
-      if (accessor.isPresent()) {
-        serializationCandidates
-            .addAll(addCandidateProperties(member, accessor.get(), jacksonProperty, givenContext));
-      }
-    }
-    return serializationCandidates;
   }
 
   private Optional<ResolvedMethod> findAccessorMethod(ResolvedType resolvedType,
@@ -159,6 +171,8 @@ public class BeanModelPropertyProvider implements ModelPropertiesProvider {
     BeanModelProperty beanModelProperty
         = new BeanModelProperty(propertyName, childProperty, Accessors.isGetter(childProperty.getRawMember()),
         typeResolver, modelContext.getAlternateTypeProvider());
+
+    LOG.debug("Adding property {} to model", propertyName);
     ModelPropertyBuilder propertyBuilder = new ModelPropertyBuilder()
         .name(beanModelProperty.getName())
         .type(beanModelProperty.getType())

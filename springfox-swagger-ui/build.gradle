@@ -27,7 +27,7 @@ buildscript {
 apply plugin: 'de.undercouch.download'
 
 ext {
-  swaggerUiVersion = '2.1.8-M1'
+  swaggerUiVersion = '2.1.0'
   swaggerUiDist = "build/libs/swagger-ui-dist.zip"
   swaggerUiExplodedDir = "swagger-ui-${swaggerUiVersion}/dist/"
   downloadUrl = "https://github.com/wordnik/swagger-ui/archive/v${swaggerUiVersion}.zip"
@@ -79,7 +79,7 @@ jar {
     manifest {
       attributes(
               "Implementation-Title": project.name,
-              "Implementation-Version": version,
+              "Implementation-Version": project.version,
               "SwaggerUi-Version": swaggerUiVersion,
       )
     }

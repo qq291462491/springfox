@@ -18,33 +18,43 @@
  */
 
 package springfox.documentation.spring.web.readers.operation
+
 import com.fasterxml.classmate.TypeResolver
+import org.springframework.plugin.core.OrderAwarePluginRegistry
+import org.springframework.plugin.core.PluginRegistry
 import org.springframework.web.bind.annotation.RequestMethod
 import springfox.documentation.builders.OperationBuilder
+import springfox.documentation.schema.DefaultTypeNameProvider
 import springfox.documentation.schema.TypeNameExtractor
 import springfox.documentation.schema.mixins.SchemaPluginsSupport
 import springfox.documentation.spi.DocumentationType
+import springfox.documentation.spi.schema.TypeNameProviderPlugin
+import springfox.documentation.spi.service.contexts.OperationContext
 import springfox.documentation.spring.web.mixins.RequestMappingSupport
 import springfox.documentation.spring.web.mixins.ServicePluginsSupport
 import springfox.documentation.spring.web.plugins.DocumentationContextSpec
-import springfox.documentation.spi.service.contexts.OperationContext
+
+import static com.google.common.base.Strings.isNullOrEmpty
 
 @Mixin([RequestMappingSupport, ServicePluginsSupport, SchemaPluginsSupport])
 class OperationResponseClassReaderSpec extends DocumentationContextSpec {
   OperationResponseClassReader sut
   
   def setup() {
-    def typeNameExtractor =
-            new TypeNameExtractor(new TypeResolver(), defaultSchemaPlugins())
+    PluginRegistry<TypeNameProviderPlugin, DocumentationType> modelNameRegistry =
+        OrderAwarePluginRegistry.create([new DefaultTypeNameProvider()])
+    def typeNameExtractor = new TypeNameExtractor(new TypeResolver(),  modelNameRegistry)
 
     sut = new OperationResponseClassReader(new TypeResolver(), typeNameExtractor)
   }
   
   def "Should support all documentation types"() {
-    sut.supports(DocumentationType.SPRING_WEB)
-    sut.supports(DocumentationType.SWAGGER_12)
-    sut.supports(DocumentationType.SWAGGER_2)
+    expect:
+      sut.supports(DocumentationType.SPRING_WEB)
+      sut.supports(DocumentationType.SWAGGER_12)
+      sut.supports(DocumentationType.SWAGGER_2)
   }
+
   def "should have correct response class"() {
     given:
       OperationContext operationContext = new OperationContext(new OperationBuilder(),
@@ -59,6 +69,10 @@ class OperationResponseClassReaderSpec extends DocumentationContextSpec {
         assert expectedClass == String.format("%s[%s]", operation.responseModel.type, operation.responseModel.itemType)
       } else {
         assert expectedClass == operation.responseModel.type
+        if ("Map".equals(operation.responseModel.type)) {
+          assert operation.responseModel.isMap()
+          assert !isNullOrEmpty(operation.responseModel.itemType)
+        }
       }
 
     where:
@@ -67,6 +81,7 @@ class OperationResponseClassReaderSpec extends DocumentationContextSpec {
       dummyHandlerMethod('methodWithAPiAnnotationButWithoutResponseClass') | 'FunkyBusiness'
       dummyHandlerMethod('methodWithGenericType')                          | 'Paginated«string»'
       dummyHandlerMethod('methodWithListOfBusinesses')                     | 'List[BusinessModel]'
+      dummyHandlerMethod('methodWithMapReturn')                            | 'Map'
   }
 
 }

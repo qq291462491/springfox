@@ -24,28 +24,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.wordnik.swagger.models.Contact;
-import com.wordnik.swagger.models.ExternalDocs;
-import com.wordnik.swagger.models.Info;
-import com.wordnik.swagger.models.License;
-import com.wordnik.swagger.models.Model;
-import com.wordnik.swagger.models.Operation;
-import com.wordnik.swagger.models.Path;
-import com.wordnik.swagger.models.Response;
-import com.wordnik.swagger.models.Scheme;
-import com.wordnik.swagger.models.SecurityRequirement;
-import com.wordnik.swagger.models.Swagger;
-import com.wordnik.swagger.models.Tag;
-import com.wordnik.swagger.models.Xml;
-import com.wordnik.swagger.models.auth.SecuritySchemeDefinition;
-import com.wordnik.swagger.models.parameters.Parameter;
-import com.wordnik.swagger.models.properties.Property;
+import io.swagger.models.Contact;
+import io.swagger.models.ExternalDocs;
+import io.swagger.models.Info;
+import io.swagger.models.License;
+import io.swagger.models.Model;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Response;
+import io.swagger.models.Scheme;
+import io.swagger.models.SecurityRequirement;
+import io.swagger.models.Swagger;
+import io.swagger.models.Tag;
+import io.swagger.models.Xml;
+import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.properties.Property;
+import springfox.documentation.spring.web.json.JacksonModuleRegistrar;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.*;
 
-public class Swagger2JacksonModule extends SimpleModule {
+public class Swagger2JacksonModule extends SimpleModule implements JacksonModuleRegistrar {
 
-  public static void maybeRegisterModule(ObjectMapper objectMapper) {
+  public void maybeRegisterModule(ObjectMapper objectMapper) {
     if (objectMapper.findMixInClassFor(Swagger.class) == null) {
       objectMapper.registerModule(new Swagger2JacksonModule());
       objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

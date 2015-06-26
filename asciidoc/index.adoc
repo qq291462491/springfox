@@ -1,9 +1,9 @@
 = Springfox Reference Documentation
 Dilip Krishnan; Adrian Kelly;
-v{springfox-version}
+v{springfox-current-version}
 :numbered:
 :toc:
-:toclevels: 10
+:toclevels: 2
 :imagesdir: ./images
 
 include::introduction.adoc[]

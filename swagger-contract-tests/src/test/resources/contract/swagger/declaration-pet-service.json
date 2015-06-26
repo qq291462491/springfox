@@ -17,7 +17,6 @@
                 {
                     "method": "POST",
                     "summary": "Add a new pet to the store",
-                    "notes": "addPet",
                     "nickname": "addPetUsingPOST",
                     "produces": [
                         "*/*"
@@ -59,8 +58,7 @@
                         },
                         {
                             "code": 405,
-                            "message": "Invalid input",
-                            "responseModel": "Void"
+                            "message": "Invalid input"
                         }
                     ],
                     "deprecated": "false",
@@ -75,7 +73,6 @@
                 {
                     "method": "PUT",
                     "summary": "Update an existing pet",
-                    "notes": "updatePet",
                     "nickname": "updatePetUsingPUT",
                     "produces": [
                         "*/*"
@@ -105,8 +102,7 @@
                         },
                         {
                             "code": 400,
-                            "message": "Invalid ID supplied",
-                            "responseModel": "Void"
+                            "message": "Invalid ID supplied"
                         },
                         {
                             "code": 401,
@@ -118,13 +114,11 @@
                         },
                         {
                             "code": 404,
-                            "message": "Not Found",
-                            "responseModel": "Void"
+                            "message": "Pet not found"
                         },
                         {
                             "code": 405,
-                            "message": "Validation exception",
-                            "responseModel": "Void"
+                            "message": "Validation exception"
                         }
                     ],
                     "deprecated": "false",
@@ -139,7 +133,6 @@
                 {
                     "method": "GET",
                     "summary": "List all pets",
-                    "notes": "listPets",
                     "nickname": "listPetsUsingGET",
                     "produces": [
                         "*/*"
@@ -184,7 +177,6 @@
                 {
                     "method": "POST",
                     "summary": "petEntities",
-                    "notes": "petEntities",
                     "nickname": "petEntitiesUsingPOST",
                     "produces": [
                         "*/*"
@@ -241,7 +233,6 @@
                 {
                     "method": "POST",
                     "summary": "echo",
-                    "notes": "echo",
                     "nickname": "echoUsingPOST",
                     "produces": [
                         "*/*"
@@ -257,7 +248,7 @@
                             "name": "body",
                             "paramType": "body",
                             "type": "List[Entry\u00abstring,Pet\u00bb]",
-                            "required": false
+                            "required": true
                         }
                     ],
                     "responseMessages": [
@@ -305,7 +296,7 @@
                     ],
                     "parameters": [
                         {
-                            "allowMultiple": true,
+                            "allowMultiple": false,
                             "enum": [
                                 "available",
                                 "pending",
@@ -327,8 +318,7 @@
                         },
                         {
                             "code": 400,
-                            "message": "Invalid status value",
-                            "responseModel": "Void"
+                            "message": "Invalid status value"
                         },
                         {
                             "code": 401,
@@ -382,8 +372,7 @@
                         },
                         {
                             "code": 400,
-                            "message": "Invalid tag value",
-                            "responseModel": "Void"
+                            "message": "Invalid tag value"
                         },
                         {
                             "code": 401,
@@ -410,7 +399,6 @@
                 {
                     "method": "POST",
                     "summary": "nameToNickNamesMap",
-                    "notes": "nameToNickNamesMap",
                     "nickname": "nameToNickNamesMapUsingPOST",
                     "produces": [
                         "*/*"
@@ -456,7 +444,6 @@
                 {
                     "method": "POST",
                     "summary": "siblings",
-                    "notes": "siblings",
                     "nickname": "siblingsUsingPOST",
                     "produces": [
                         "*/*"
@@ -513,7 +500,6 @@
                 {
                     "method": "POST",
                     "summary": "transformPetNameToPetMapToAny",
-                    "notes": "transformPetNameToPetMapToAny",
                     "nickname": "transformPetNameToPetMapToAnyUsingPOST",
                     "produces": [
                         "*/*"
@@ -567,7 +553,6 @@
                 {
                     "method": "POST",
                     "summary": "transformPetNameToPetMapToGenericOpenMap",
-                    "notes": "transformPetNameToPetMapToGenericOpenMap",
                     "nickname": "transformPetNameToPetMapToGenericOpenMapUsingPOST",
                     "produces": [
                         "*/*"
@@ -621,7 +606,6 @@
                 {
                     "method": "POST",
                     "summary": "transformPetNameToPetMapToOpenMap",
-                    "notes": "transformPetNameToPetMapToOpenMap",
                     "nickname": "transformPetNameToPetMapToOpenMapUsingPOST",
                     "produces": [
                         "*/*"
@@ -675,7 +659,6 @@
                 {
                     "method": "GET",
                     "summary": "method",
-                    "notes": "method",
                     "nickname": "methodUsingGET",
                     "produces": [
                         "*/*"
@@ -733,7 +716,6 @@
                 {
                     "method": "POST",
                     "summary": "petByName",
-                    "notes": "petByName",
                     "nickname": "petByNameUsingPOST",
                     "produces": [
                         "*/*"
@@ -839,7 +821,6 @@
                 {
                     "method": "POST",
                     "summary": "updatePic",
-                    "notes": "updatePic",
                     "nickname": "updatePicUsingPOST",
                     "produces": [
                         "*/*"
@@ -901,7 +882,6 @@
                 {
                     "method": "GET",
                     "summary": "updatePic",
-                    "notes": "updatePic",
                     "nickname": "updatePicUsingGET",
                     "produces": [
                         "*/*"

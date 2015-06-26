@@ -17,7 +17,8 @@
     "basePath": "/",
     "tags": [
         {
-            "name": "business-service"
+            "name": "business-service",
+            "description": "Services to demonstrate path variable resolution"
         }
     ],
     "produces": [
@@ -31,7 +32,6 @@
                     "business-service"
                 ],
                 "summary": "Find a business by its id",
-                "description": "getAliasedPathVariable",
                 "operationId": "findBusinessById",
                 "consumes": [
                     "application/json"
@@ -65,7 +65,6 @@
                     "business-service"
                 ],
                 "summary": "businessesByCategories",
-                "description": "businessesByCategories",
                 "operationId": "businessesByCategoriesUsingGET",
                 "consumes": [
                     "application/json"
@@ -83,7 +82,11 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv"
+                        "collectionFormat": "csv",
+                        "enum": [
+                            "PRODUCT",
+                            "SERVICE"
+                        ],
                     }
                 ],
                 "responses": {
@@ -99,13 +102,35 @@
                 }
             }
         },
+        "/businesses/demonstratesApiModelName": {
+          "post": {
+            "tags": [
+              "business-service"
+            ],
+            "summary": "businessAsString",
+            "operationId": "businessAsStringUsingPOST",
+            "consumes": [
+              "application/json"
+            ],
+            "produces": [
+              "application/json"
+            ],
+            "responses": {
+              "200": {
+                "description": "Business",
+                "schema": {
+                  "$ref": "#/definitions/Biz"
+                }
+              }
+            }
+          }
+        },
         "/businesses/non-aliased/{businessId}": {
             "get": {
                 "tags": [
                     "business-service"
                 ],
                 "summary": "Find a business by its id",
-                "description": "getNonAliasedPathVariable",
                 "operationId": "findBusinessById",
                 "consumes": [
                     "application/json"
@@ -146,7 +171,6 @@
                     "business-service"
                 ],
                 "summary": "getResponseEntity",
-                "description": "getResponseEntity",
                 "operationId": "getResponseEntityUsingGET",
                 "consumes": [
                     "application/json"
@@ -180,7 +204,6 @@
                     "business-service"
                 ],
                 "summary": "businessTypeEcho",
-                "description": "businessTypeEcho",
                 "operationId": "businessTypeEchoUsingPOST",
                 "consumes": [
                     "application/json"
@@ -193,7 +216,7 @@
                         "in": "body",
                         "name": "business",
                         "description": "business",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "string"
                         }
@@ -215,7 +238,6 @@
                     "business-service"
                 ],
                 "summary": "getVanillaPathVariable",
-                "description": "getVanillaPathVariable",
                 "operationId": "getVanillaPathVariableUsingGET",
                 "consumes": [
                     "application/json"

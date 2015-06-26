@@ -17,7 +17,8 @@
     "basePath": "/",
     "tags": [
         {
-            "name": "feature-demonstration-service"
+            "name": "feature-demonstration-service",
+            "description": "Demonstration of features"
         }
     ],
     "produces": [
@@ -31,7 +32,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "description": "allMethodAllowed",
                 "operationId": "allMethodAllowedUsingGET",
                 "consumes": [
                     "application/json"
@@ -50,7 +50,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "description": "allMethodAllowed",
                 "operationId": "allMethodAllowedUsingPOST",
                 "consumes": [
                     "application/json"
@@ -69,7 +68,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "description": "allMethodAllowed",
                 "operationId": "allMethodAllowedUsingPUT",
                 "consumes": [
                     "application/json"
@@ -88,7 +86,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "description": "allMethodAllowed",
                 "operationId": "allMethodAllowedUsingDELETE",
                 "consumes": [
                     "application/json"
@@ -107,7 +104,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "description": "allMethodAllowed",
                 "operationId": "allMethodAllowedUsingOPTIONS",
                 "consumes": [
                     "application/json"
@@ -126,7 +122,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "description": "allMethodAllowed",
                 "operationId": "allMethodAllowedUsingPATCH",
                 "consumes": [
                     "application/json"
@@ -147,7 +142,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getBare",
-                "description": "getBare",
                 "operationId": "getBareUsingPOST",
                 "consumes": [
                     "application/json"
@@ -179,7 +173,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateBigDecimal",
-                "description": "updateBigDecimal",
                 "operationId": "updateBigDecimalUsingPOST",
                 "consumes": [
                     "application/json"
@@ -211,7 +204,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateDate",
-                "description": "updateDate",
                 "operationId": "updateDateUsingPOST",
                 "consumes": [
                     "application/json"
@@ -243,7 +235,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getEffective",
-                "description": "getEffective",
                 "operationId": "getEffectiveUsingGET",
                 "consumes": [
                     "application/json"
@@ -267,7 +258,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getEffectives",
-                "description": "getEffectives",
                 "operationId": "getEffectivesUsingGET",
                 "consumes": [
                     "application/json"
@@ -288,13 +278,61 @@
                 }
             }
         },
+        "/features/listOfMaps": {
+            "get": {
+                "tags": [
+                    "feature-demonstration-service"
+                ],
+                "summary": "listOfMaps",
+                "operationId": "listOfMapsUsingGET",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/MapOfstringAndstring"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/features/mapProperty": {
+            "get": {
+                "tags": [
+                    "feature-demonstration-service"
+                ],
+                "summary": "modelWithMapProperty",
+                "operationId": "modelWithMapPropertyUsingGET",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelWithMapProperty"
+                        }
+                    }
+                }
+            }
+        },
         "/features/status": {
             "post": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "updateBaz",
-                "description": "updateBaz",
                 "operationId": "updateBazUsingPOST",
                 "consumes": [
                     "application/json"
@@ -326,7 +364,6 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateBazes",
-                "description": "updateBazes",
                 "operationId": "updateBazesUsingPOST",
                 "consumes": [
                     "application/json"
@@ -477,6 +514,9 @@
                 },
                 "propertyWithNoSetterMethod": {
                     "type": "string"
+                },
+                "propertyWithNoGetterMethod": {
+                    "type": "string"
                 }
             }
         },
@@ -597,6 +637,24 @@
                     "format": "int32"
                 }
             }
+        },
+        "MapOfstringAndstring": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "ModelWithMapProperty": {
+            "properties": {
+                "params": {
+                    "type": "object",
+                    "description": "Map of params to be sent",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            },
+            "description": "Describes model with map property"
         },
         "NestedType": {
             "properties": {

@@ -20,15 +20,18 @@
 package springfox.documentation.swagger2.mappers;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.wordnik.swagger.models.Model;
-import com.wordnik.swagger.models.ModelImpl;
-import com.wordnik.swagger.models.properties.AbstractNumericProperty;
-import com.wordnik.swagger.models.properties.ArrayProperty;
-import com.wordnik.swagger.models.properties.MapProperty;
-import com.wordnik.swagger.models.properties.Property;
-import com.wordnik.swagger.models.properties.StringProperty;
+import com.google.common.collect.Multimap;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.AbstractNumericProperty;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.MapProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.StringProperty;
 import org.mapstruct.Mapper;
 import springfox.documentation.schema.ModelProperty;
 import springfox.documentation.schema.ModelRef;
@@ -42,6 +45,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.google.common.collect.Maps.*;
+import static springfox.documentation.schema.Maps.*;
 import static springfox.documentation.swagger2.mappers.Properties.*;
 
 @Mapper
@@ -77,7 +81,22 @@ public abstract class ModelMapper {
         .transform(propertyName());
     model.setRequired(requiredFields.toList());
     model.setSimple(false);
+    if (isMapType(source.getType())) {
+      Optional<Class> clazz = typeOfValue(source);
+      if (clazz.isPresent()) {
+        model.additionalProperties(property(clazz.get().getSimpleName()));
+      } else {
+        model.additionalProperties(new ObjectProperty());
+      }
+    }
     return model;
+  }
+
+  private Optional<Class> typeOfValue(springfox.documentation.schema.Model source) {
+    if (source.getType().getTypeParameters() != null && source.getType().getTypeParameters().size() > 0) {
+      return Optional.of((Class)source.getType().getTypeParameters().get(1).getErasedType());
+    }
+    return Optional.absent();
   }
 
   public Property mapProperty(ModelProperty source) {
@@ -96,14 +115,16 @@ public abstract class ModelMapper {
         ((AbstractNumericProperty) property).minimum(Double.valueOf(range.getMin()));
       }
     }
-    property.setDescription(source.getDescription());
-    property.setName(source.getName());
-    property.setRequired(source.isRequired());
+    if (property != null) {
+      property.setDescription(source.getDescription());
+      property.setName(source.getName());
+      property.setRequired(source.isRequired());
+    }
     return property;
   }
 
   static Property modelRefToProperty(ModelRef modelRef) {
-    if (modelRef == null) {
+    if (modelRef == null || "void".equalsIgnoreCase(modelRef.getType())) {
       return null;
     }
     Property responseProperty;
@@ -119,7 +140,7 @@ public abstract class ModelMapper {
     return responseProperty;
   }
 
-  protected Map<String, Model> modelsFromApiListings(Map<String, ApiListing> apiListings) {
+  protected Map<String, Model> modelsFromApiListings(Multimap<String, ApiListing> apiListings) {
     Map<String, springfox.documentation.schema.Model> definitions = newHashMap();
     for (ApiListing each : apiListings.values()) {
       definitions.putAll(each.getModels());

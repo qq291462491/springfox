@@ -1,4 +1,5 @@
 package springfox.documentation.swagger2.web
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.JsonPath
 import org.springframework.http.MediaType
@@ -9,6 +10,7 @@ import org.springframework.web.servlet.View
 import spock.lang.Shared
 import spock.lang.Unroll
 import springfox.documentation.spring.web.DocumentationCache
+import springfox.documentation.spring.web.json.JsonSerializer
 import springfox.documentation.spring.web.mixins.ApiListingSupport
 import springfox.documentation.spring.web.mixins.AuthSupport
 import springfox.documentation.spring.web.mixins.JsonSupport
@@ -37,6 +39,7 @@ class Swagger2ControllerSpec extends DocumentationContextSpec implements MapperS
 
   def setup() {
     controller.documentationCache = new DocumentationCache()
+    controller.jsonSerializer = new JsonSerializer([new Swagger2JacksonModule()])
     listingReferenceScanner = Mock(ApiListingReferenceScanner)
     listingReferenceScanner.scan(_) >> new ApiListingReferenceScanResult([], newHashMap())
     controller.mapper = swagger2Mapper()
@@ -45,9 +48,8 @@ class Swagger2ControllerSpec extends DocumentationContextSpec implements MapperS
     jackson2.setSupportedMediaTypes([MediaType.ALL, MediaType.APPLICATION_JSON])
 
     def mapper = new ObjectMapper()
-    Swagger2JacksonModule.maybeRegisterModule(mapper)
-
     jackson2.setObjectMapper(mapper)
+
     mockMvc = standaloneSetup(controller)
         .setSingleView(mockView)
         .setMessageConverters(jackson2)

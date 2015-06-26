@@ -17,7 +17,8 @@
     "basePath": "/",
     "tags": [
         {
-            "name": "concrete-controller"
+            "name": "concrete-controller",
+            "description": "Concrete Controller"
         }
     ],
     "produces": [
@@ -32,7 +33,6 @@
                 ],
                 "operationId": "createUsingPUT",
                 "summary": "create",
-                "description": "create",
                 "consumes": [
                     "application/json"
                 ],
@@ -64,7 +64,6 @@
                 ],
                 "operationId": "getUsingGET",
                 "summary": "get",
-                "description": "get",
                 "consumes": [
                     "application/json"
                 ],

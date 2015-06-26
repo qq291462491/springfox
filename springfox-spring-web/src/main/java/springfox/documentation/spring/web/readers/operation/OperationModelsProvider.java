@@ -28,6 +28,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.method.HandlerMethod;
 import springfox.documentation.service.ResolvedMethodParameter;
 import springfox.documentation.spi.DocumentationType;
@@ -38,13 +39,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static springfox.documentation.schema.ResolvedTypes.resolvedTypeSignature;
 import static springfox.documentation.spring.web.HandlerMethodReturnTypes.*;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class OperationModelsProvider implements OperationModelsProviderPlugin {
 
-  private static final Logger log = LoggerFactory.getLogger(OperationModelsProvider.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OperationModelsProvider.class);
   private final TypeResolver typeResolver;
 
   @Autowired
@@ -66,6 +68,7 @@ public class OperationModelsProvider implements OperationModelsProviderPlugin {
   private void collectFromReturnType(RequestMappingContext context) {
     ResolvedType modelType = handlerReturnType(typeResolver, context.getHandlerMethod());
     modelType = context.alternateFor(modelType);
+    LOG.debug("Adding return parameter of type {}", resolvedTypeSignature(modelType).or("<null>"));
     context.operationModelsBuilder().addReturn(modelType);
   }
 
@@ -74,7 +77,7 @@ public class OperationModelsProvider implements OperationModelsProviderPlugin {
     HandlerMethod handlerMethod = context.getHandlerMethod();
     Method method = handlerMethod.getMethod();
 
-    log.debug("Reading parameters models for handlerMethod |{}|", handlerMethod.getMethod().getName());
+    LOG.debug("Reading parameters models for handlerMethod |{}|", handlerMethod.getMethod().getName());
 
     HandlerMethodResolver handlerMethodResolver = new HandlerMethodResolver(typeResolver);
     List<ResolvedMethodParameter> parameterTypes = handlerMethodResolver.methodParameters(handlerMethod);
@@ -83,13 +86,14 @@ public class OperationModelsProvider implements OperationModelsProviderPlugin {
     for (int i = 0; i < annotations.length; i++) {
       Annotation[] pAnnotations = annotations[i];
       for (Annotation annotation : pAnnotations) {
-        if (annotation instanceof RequestBody) {
+        if (annotation instanceof RequestBody || annotation instanceof RequestPart) {
           ResolvedMethodParameter pType = parameterTypes.get(i);
           ResolvedType modelType = context.alternateFor(pType.getResolvedParameterType());
+          LOG.debug("Adding input parameter of type {}", resolvedTypeSignature(modelType).or("<null>"));
           context.operationModelsBuilder().addInputParam(modelType);
         }
       }
     }
-    log.debug("Finished reading parameters models for handlerMethod |{}|", handlerMethod.getMethod().getName());
+    LOG.debug("Finished reading parameters models for handlerMethod |{}|", handlerMethod.getMethod().getName());
   }
 }

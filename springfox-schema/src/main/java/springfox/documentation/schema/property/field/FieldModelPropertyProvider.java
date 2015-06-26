@@ -32,6 +32,8 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import springfox.documentation.builders.ModelPropertyBuilder;
@@ -42,19 +44,22 @@ import springfox.documentation.schema.configuration.ObjectMapperConfigured;
 import springfox.documentation.schema.plugins.SchemaPluginsManager;
 import springfox.documentation.schema.property.BeanPropertyDefinitions;
 import springfox.documentation.schema.property.BeanPropertyNamingStrategy;
-import springfox.documentation.schema.property.provider.ModelPropertiesProvider;
+import springfox.documentation.schema.property.ModelPropertiesProvider;
 import springfox.documentation.spi.schema.contexts.ModelContext;
 import springfox.documentation.spi.schema.contexts.ModelPropertyContext;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Predicates.*;
+import static com.google.common.collect.FluentIterable.*;
 import static com.google.common.collect.Lists.*;
 import static springfox.documentation.schema.ResolvedTypes.*;
+import static springfox.documentation.schema.property.BeanPropertyDefinitions.*;
 
 @Component
 public class FieldModelPropertyProvider implements ModelPropertiesProvider {
+  private static final Logger LOG = LoggerFactory.getLogger(FieldModelPropertyProvider.class);
 
   private final FieldProvider fieldProvider;
   private final BeanPropertyNamingStrategy namingStrategy;
@@ -76,23 +81,23 @@ public class FieldModelPropertyProvider implements ModelPropertiesProvider {
   }
 
   @VisibleForTesting
-  List<ModelProperty> addSerializationCandidates(AnnotatedMember member, ResolvedField
+  List<ModelProperty> serializationCandidates(AnnotatedMember member, ResolvedField
       childField, Optional<BeanPropertyDefinition> jacksonProperty, ModelContext givenContext) {
-    if (memberIsAField(member)) {
-      if (Annotations.memberIsUnwrapped(member)) {
-        return propertiesFor(childField.getType(), ModelContext.fromParent(givenContext, childField.getType()));
-      } else {
-        String fieldName = BeanPropertyDefinitions.name(jacksonProperty.get(), true, namingStrategy);
-        return newArrayList(modelPropertyFrom(childField, fieldName, givenContext));
-      }
+    if (Annotations.memberIsUnwrapped(member)) {
+      LOG.debug("Evaluating unwrapped member");
+      return propertiesFor(childField.getType(), ModelContext.fromParent(givenContext, childField.getType()));
+    } else {
+      String fieldName = BeanPropertyDefinitions.name(jacksonProperty.get(), true, namingStrategy);
+      return from(newArrayList(modelPropertyFrom(childField, fieldName, givenContext)))
+          .filter(not(ignorable(givenContext)))
+          .toList();
     }
-    return newArrayList();
   }
 
   private ModelProperty modelPropertyFrom(ResolvedField childField, String fieldName,
       ModelContext modelContext) {
-    FieldModelProperty fieldModelProperty = new FieldModelProperty(fieldName, childField, modelContext
-        .getAlternateTypeProvider());
+    FieldModelProperty fieldModelProperty = new FieldModelProperty(fieldName, childField,
+        modelContext.getAlternateTypeProvider());
     ModelPropertyBuilder propertyBuilder = new ModelPropertyBuilder()
         .name(fieldModelProperty.getName())
         .type(fieldModelProperty.getType())
@@ -110,8 +115,7 @@ public class FieldModelPropertyProvider implements ModelPropertiesProvider {
   }
 
   @Override
-  public List<ModelProperty> propertiesFor(ResolvedType type,
-                                           ModelContext givenContext) {
+  public List<ModelProperty> propertiesFor(ResolvedType type, ModelContext givenContext) {
 
     List<ModelProperty> serializationCandidates = newArrayList();
     BeanDescription beanDescription = beanDescription(type, givenContext);
@@ -119,13 +123,14 @@ public class FieldModelPropertyProvider implements ModelPropertiesProvider {
         BeanPropertyDefinitions.beanPropertyByInternalName());
 
     for (ResolvedField childField : fieldProvider.in(type)) {
+      LOG.debug("Reading property {}", childField.getName());
       if (propertyLookup.containsKey(childField.getName())) {
         BeanPropertyDefinition propertyDefinition = propertyLookup.get(childField.getName());
         Optional<BeanPropertyDefinition> jacksonProperty
             = BeanPropertyDefinitions.jacksonPropertyWithSameInternalName(beanDescription, propertyDefinition);
-        AnnotatedMember member = propertyDefinition.getPrimaryMember();
-        serializationCandidates.addAll(newArrayList(addSerializationCandidates(member, childField, jacksonProperty,
-            givenContext)));
+        AnnotatedMember member = propertyDefinition.getField();
+        serializationCandidates.addAll(
+              newArrayList(serializationCandidates(member, childField, jacksonProperty, givenContext)));
       }
     }
     return serializationCandidates;
@@ -145,11 +150,5 @@ public class FieldModelPropertyProvider implements ModelPropertiesProvider {
 
   public void onApplicationEvent(ObjectMapperConfigured event) {
     this.objectMapper = event.getObjectMapper();
-  }
-
-  protected boolean memberIsAField(AnnotatedMember member) {
-    return member != null
-        && member.getMember() != null
-        && Field.class.isAssignableFrom(member.getMember().getClass());
   }
 }

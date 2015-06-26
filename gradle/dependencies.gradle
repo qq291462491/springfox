@@ -1,5 +1,5 @@
 ext {
-  swagger2Core = "1.5.3-M1"
+  swagger2Core = "1.5.0"
   spring = "4.0.9.RELEASE"
   groovy = "2.4.3"
   spock = "1.0-groovy-2.4"
@@ -8,8 +8,8 @@ ext {
   slf4j = "1.7.12"
   mockito = "1.10.19"
   servlet = "3.0.1"
-  classmate = "1.1.0"
-  jackson = '2.5.2'
+  classmate = "1.2.0"
+  jackson = '2.5.3'
   snakeyaml = '1.15'
   springPluginVersion = "1.2.0.RELEASE"
   jsonPath = "2.0.0"
@@ -27,8 +27,8 @@ ext {
                   "org.spockframework:spock-core:${spock}"
           ],
           swagger2Core  : [
-                  "com.wordnik:swagger-annotations:${swagger2Core}",
-                  "com.wordnik:swagger-models:${swagger2Core}"
+                  "io.swagger:swagger-annotations:${swagger2Core}",
+                  "io.swagger:swagger-models:${swagger2Core}"
           ],
           spring        : [
                   "org.springframework.plugin:spring-plugin-core:${springPluginVersion}",
@@ -52,7 +52,7 @@ ext {
                   "com.google.guava:guava:${guava}",
                   "com.fasterxml:classmate:${classmate}",
                   "org.slf4j:slf4j-api:${slf4j}",
-                  'joda-time:joda-time:2.7'
+                  'joda-time:joda-time:2.8'
 
           ]
   ]

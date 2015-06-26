@@ -17,7 +17,6 @@
                 {
                     "method": "GET",
                     "summary": "exampleWithNoRequestMapping",
-                    "notes": "exampleWithNoRequestMapping",
                     "nickname": "exampleWithNoRequestMappingUsingGET",
                     "produces": [
                         "*/*"
@@ -222,6 +221,10 @@
                     "type": "string"
                 },
                 "propertyWithNoSetterMethod": {
+                    "required": false,
+                    "type": "string"
+                },
+                "propertyWithNoGetterMethod": {
                     "required": false,
                     "type": "string"
                 }

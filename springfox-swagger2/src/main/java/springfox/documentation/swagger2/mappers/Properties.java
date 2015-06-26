@@ -21,19 +21,20 @@ package springfox.documentation.swagger2.mappers;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
-import com.wordnik.swagger.models.properties.BooleanProperty;
-import com.wordnik.swagger.models.properties.DateProperty;
-import com.wordnik.swagger.models.properties.DateTimeProperty;
-import com.wordnik.swagger.models.properties.DecimalProperty;
-import com.wordnik.swagger.models.properties.DoubleProperty;
-import com.wordnik.swagger.models.properties.FloatProperty;
-import com.wordnik.swagger.models.properties.IntegerProperty;
-import com.wordnik.swagger.models.properties.LongProperty;
-import com.wordnik.swagger.models.properties.ObjectProperty;
-import com.wordnik.swagger.models.properties.Property;
-import com.wordnik.swagger.models.properties.RefProperty;
-import com.wordnik.swagger.models.properties.StringProperty;
-import com.wordnik.swagger.models.properties.UUIDProperty;
+import io.swagger.models.properties.BooleanProperty;
+import io.swagger.models.properties.DateProperty;
+import io.swagger.models.properties.DateTimeProperty;
+import io.swagger.models.properties.DecimalProperty;
+import io.swagger.models.properties.DoubleProperty;
+import io.swagger.models.properties.FileProperty;
+import io.swagger.models.properties.FloatProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.LongProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
+import io.swagger.models.properties.UUIDProperty;
 
 import java.util.Map;
 
@@ -56,6 +57,7 @@ class Properties {
           .put("uuid", newInstanceOf(UUIDProperty.class))
           .put("object", newInstanceOf(ObjectProperty.class))
           .put("byte", bytePropertyFactory())
+          .put("file", filePropertyFactory())
         .build();
 
   private Properties() {
@@ -102,6 +104,15 @@ class Properties {
         StringProperty byteArray = new StringProperty();
         byteArray.setFormat("byte");
         return byteArray;
+      }
+    };
+  }
+
+  private static Function<String, ? extends Property> filePropertyFactory() {
+    return new Function<String, Property>() {
+      @Override
+      public Property apply(String input) {
+        return new FileProperty();
       }
     };
   }

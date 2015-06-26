@@ -20,7 +20,7 @@
 package springfox.documentation.swagger2.web;
 
 import com.google.common.base.Optional;
-import com.wordnik.swagger.models.Swagger;
+import io.swagger.models.Swagger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -33,6 +33,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
 import springfox.documentation.service.Documentation;
 import springfox.documentation.spring.web.DocumentationCache;
+import springfox.documentation.spring.web.json.Json;
+import springfox.documentation.spring.web.json.JsonSerializer;
+import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.mappers.ServiceModelToSwagger2Mapper;
 
 import java.net.URI;
@@ -53,22 +56,25 @@ public class Swagger2Controller {
   @Autowired
   private ServiceModelToSwagger2Mapper mapper;
 
+  @Autowired
+  private JsonSerializer jsonSerializer;
+
   @ApiIgnore
   @RequestMapping(value = "${springfox.documentation.swagger.v2.path:" + DEFAULT_URL + "}",
-      method = RequestMethod.GET)
+          method = RequestMethod.GET)
   public
   @ResponseBody
-  ResponseEntity<Swagger> getDocumentation(
+  ResponseEntity<Json> getDocumentation(
           @RequestParam(value = "group", required = false) String swaggerGroup) {
 
-    String groupName = Optional.fromNullable(swaggerGroup).or("default");
+    String groupName = Optional.fromNullable(swaggerGroup).or(Docket.DEFAULT_GROUP_NAME);
     Documentation documentation = documentationCache.documentationByGroup(groupName);
     if (documentation == null) {
-      return new ResponseEntity<Swagger>(HttpStatus.NOT_FOUND);
+      return new ResponseEntity<Json>(HttpStatus.NOT_FOUND);
     }
     Swagger swagger = mapper.mapDocumentation(documentation);
     swagger.host(hostName());
-    return new ResponseEntity<Swagger>(swagger, HttpStatus.OK);
+    return new ResponseEntity<Json>(jsonSerializer.toJson(swagger), HttpStatus.OK);
   }
 
   private String hostName() {
@@ -83,5 +89,4 @@ public class Swagger2Controller {
     }
     return hostNameOverride;
   }
-
 }

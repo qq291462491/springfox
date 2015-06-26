@@ -19,13 +19,13 @@
 
 package springfox.documentation.spring.web.dummy;
 
-import com.wordnik.swagger.annotations.ApiImplicitParam;
-import com.wordnik.swagger.annotations.ApiImplicitParams;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
-import com.wordnik.swagger.annotations.Authorization;
-import com.wordnik.swagger.annotations.AuthorizationScope;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -48,6 +48,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping(produces = {"application/json"}, consumes = {"application/json", "application/xml"})
 public class DummyClass {
@@ -124,7 +125,7 @@ public class DummyClass {
   }
 
   @ApiOperation(value = "SomeVal",
-          authorizations = @Authorization(value = "oauth2", type = "",
+          authorizations = @Authorization(value = "oauth2",
                   scopes = {@AuthorizationScope(scope = "scope", description = "scope description")
                   }))
   public void methodWithAuth() {
@@ -239,6 +240,11 @@ public class DummyClass {
 
   @ResponseBody
   public DummyModels.BusinessModel methodWithConcreteResponseBody() {
+    return null;
+  }
+
+  @ResponseBody
+  public Map<String, DummyModels.BusinessModel> methodWithMapReturn() {
     return null;
   }
 
